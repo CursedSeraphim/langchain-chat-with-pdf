@@ -2,13 +2,14 @@ import os
 
 import streamlit as st
 from dotenv import load_dotenv
+from PyPDF2 import PdfReader
+
 from langchain import FAISS
 from langchain.callbacks import get_openai_callback
 from langchain.chains.question_answering import load_qa_chain
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.llms import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
-from PyPDF2 import PdfReader
 
 # Load environment variables
 load_dotenv()
@@ -34,6 +35,9 @@ def process_text(text):
 def main():
     st.title("Chat with your PDF 💬")
     
+    # Dropdown for model selection
+    model_name = st.selectbox("Select the LLM Model:", ('gpt-4', 'gpt-3.5-turbo'))
+    
     query = st.text_input('Ask a question to the PDF')
     pdf = st.file_uploader('Upload your PDF Document', type='pdf')
     
@@ -55,7 +59,7 @@ def main():
         if query:
             docs = knowledgeBase.similarity_search(query)
   
-        llm = OpenAI(model_name='gpt-4')
+        llm = OpenAI(model_name=model_name)  # Using the selected model_name
         chain = load_qa_chain(llm, chain_type='stuff')
         
         with get_openai_callback() as cost:
@@ -68,4 +72,3 @@ def main():
             
 if __name__ == "__main__":
     main()
-    
